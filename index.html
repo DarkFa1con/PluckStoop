@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PluckStoop</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<div class="app">
+
+  <!-- LEFT SIDEBAR -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-logo">
+        <img src="icon.png" width="28" height="28" style="border-radius:6px;display:block;" alt="PluckStoop"/>
+      </div>
+      <div style="flex:1">
+        <div class="brand-name">PluckStoop</div>
+        <div class="brand-ver">v2.0 · Muhammad Hassnain</div>
+      </div>
+      <button class="btn-about" id="btnAbout" title="About PluckStoop">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.4"/>
+          <path d="M7 6.5v4M7 4.5v.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Tab Bar -->
+    <div class="tab-bar">
+      <button class="tab active" data-tab="files">Files</button>
+      <button class="tab" data-tab="report">Report</button>
+    </div>
+
+    <!-- Files Tab -->
+    <div class="tab-content" id="tabFiles">
+      <div class="action-bar">
+        <button class="btn-icon" id="btnAdd" title="Add Files">
+          <svg width="15" height="15" viewBox="0 0 15 15"><path d="M7.5 1v13M1 7.5h13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          Files
+        </button>
+        <button class="btn-icon" id="btnFolder" title="Add Folder">
+          <svg width="15" height="15" viewBox="0 0 15 15"><path d="M1 4a1 1 0 011-1h4l2 2h5a1 1 0 011 1v6a1 1 0 01-1 1H2a1 1 0 01-1-1V4z" stroke="currentColor" stroke-width="1.4" fill="none"/></svg>
+          Folder
+        </button>
+        <div style="flex:1"></div>
+        <button class="btn-icon danger" id="btnClearAll" title="Clear All">
+          <svg width="13" height="13" viewBox="0 0 13 13"><path d="M1 1l11 11M12 1L1 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+
+      <!-- Filter pills -->
+      <div class="filter-bar">
+        <button class="filter-pill active" data-filter="all">All</button>
+        <button class="filter-pill" data-filter="image">🖼 Images</button>
+        <button class="filter-pill" data-filter="pdf">📄 PDF</button>
+        <button class="filter-pill" data-filter="audio">🎵 Audio</button>
+        <button class="filter-pill" data-filter="video">🎬 Video</button>
+        <button class="filter-pill" data-filter="office">📊 Office</button>
+      </div>
+
+      <div class="drop-zone" id="dropZone">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" style="opacity:.4;margin-bottom:8px">
+          <path d="M16 4v18M8 12l8-8 8 8" stroke="#00ffb3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M4 26h24" stroke="#555" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span>Drop any files here</span>
+        <small>Images · PDF · Audio · Video · Office</small>
+      </div>
+
+      <div class="list-meta-bar">
+        <span id="fileCount">0 files</span>
+        <label class="select-all-label">
+          <input type="checkbox" id="chkSelectAll"> All
+        </label>
+      </div>
+
+      <ul class="file-list" id="fileList"></ul>
+    </div>
+
+    <!-- Report Tab -->
+    <div class="tab-content hidden" id="tabReport">
+      <div class="report-panel">
+        <div class="report-stats" id="reportStats">
+          <div class="stat-card"><div class="stat-val" id="statTotal">0</div><div class="stat-lbl">Total Files</div></div>
+          <div class="stat-card"><div class="stat-val" id="statDirty">0</div><div class="stat-lbl">Has Metadata</div></div>
+          <div class="stat-card"><div class="stat-val" id="statClean">0</div><div class="stat-lbl">Clean</div></div>
+          <div class="stat-card"><div class="stat-val" id="statScrubbed">0</div><div class="stat-lbl">Scrubbed</div></div>
+        </div>
+        <button class="btn-export" id="btnExport">
+          <svg width="14" height="14" viewBox="0 0 14 14"><path d="M7 1v8M3 6l4 4 4-4M1 11h12" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Export CSV Report
+        </button>
+        <div class="report-list" id="reportList"></div>
+      </div>
+    </div>
+
+    <!-- Bottom Actions -->
+    <div class="sidebar-footer">
+      <button class="btn-scrub-all" id="btnScrub" disabled>
+        <svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span id="scrubLabel">Scrub Selected</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN PANEL -->
+  <main class="main-panel">
+    <!-- Top bar -->
+    <div class="main-topbar">
+      <div class="main-title" id="mainTitle">
+        <span class="title-hint">Select a file to inspect metadata</span>
+      </div>
+      <div class="topbar-actions" id="topbarActions" style="display:none">
+        <span class="badge" id="catBadge">IMAGE</span>
+        <span class="size-badge" id="sizeBadge">—</span>
+        <button class="btn-open" id="btnOpenFile">Open File ↗</button>
+      </div>
+    </div>
+
+    <!-- Preview + Meta split -->
+    <div class="content-split" id="contentSplit">
+
+      <!-- Empty State -->
+      <div class="empty-state" id="emptyState">
+        <div class="empty-glyph">
+          <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+            <rect x="10" y="15" width="60" height="50" rx="8" stroke="#1e2a22" stroke-width="2"/>
+            <circle cx="28" cy="32" r="7" stroke="#253028" stroke-width="1.5"/>
+            <path d="M10 52l15-12 13 10 13-15 19 17" stroke="#1e2a22" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M52 18v-6M58 21l4-4M55 27h6" stroke="#00ffb3" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+          </svg>
+        </div>
+        <p>Add files to start inspecting metadata</p>
+        <small>Supports JPEG, PNG, PDF, DOCX, XLSX, MP3, FLAC, WAV, MP4, MOV, AVI &amp; more</small>
+      </div>
+
+      <!-- Active file view -->
+      <div class="file-view" id="fileView" style="display:none">
+
+        <!-- Preview Panel -->
+        <div class="preview-panel" id="previewPanel">
+          <div class="preview-inner" id="previewInner">
+            <div class="preview-placeholder" id="previewPlaceholder">
+              <div class="file-type-icon" id="fileTypeIcon"></div>
+              <span id="fileTypeLabel"></span>
+            </div>
+            <img id="previewImg" style="display:none" alt="Preview"/>
+            <div id="audioPreview" style="display:none">
+              <div class="audio-cover" id="audioCover">🎵</div>
+              <audio id="audioPlayer" controls></audio>
+            </div>
+            <video id="videoPreview" controls style="display:none"></video>
+          </div>
+          <div class="before-after" id="beforeAfterBadge" style="display:none">
+            <span class="ba-label">Before</span>
+            <div class="ba-bar"><div class="ba-fill" id="baFill"></div></div>
+            <span class="ba-label">After</span>
+            <span class="ba-pct" id="baPct"></span>
+          </div>
+        </div>
+
+        <!-- Metadata Panel -->
+        <div class="meta-panel">
+          <div class="meta-header">
+            <div class="meta-pills" id="metaPills"></div>
+            <button class="btn-scrub-single" id="btnScrubSingle">Scrub This File</button>
+          </div>
+          <div id="metaContent" class="meta-content"></div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+</div>
+
+<!-- Toast container -->
+<div class="toasts" id="toasts"></div>
+
+<!-- Loading overlay -->
+<div class="loading-overlay" id="loadingOverlay" style="display:none">
+  <div class="loading-spinner"></div>
+  <span id="loadingText">Processing…</span>
+</div>
+
+
+<!-- About Modal -->
+<div class="about-overlay" id="aboutOverlay" style="display:none">
+  <div class="about-modal">
+    <button class="about-close" id="aboutClose">
+      <svg width="12" height="12" viewBox="0 0 12 12"><path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+    <div class="about-icon">
+      <img src="icon.png" width="72" height="72" style="border-radius:16px;box-shadow:0 0 30px rgba(0,255,179,0.2);" alt="icon"/>
+      <div class="about-icon-ring"></div>
+    </div>
+    <div class="about-appname">PluckStoop</div>
+    <div class="about-tagline">Universal Metadata Scrubber</div>
+    <div class="about-version">Version 2.0.0</div>
+    <div class="about-divider"></div>
+    <div class="about-author-block">
+      <div class="about-author-label">CREATED BY</div>
+      <div class="about-author-name">Muhammad Hassnain</div>
+    </div>
+    <div class="about-divider"></div>
+    <div class="about-features">
+      <div class="about-feat">🖼 JPEG &amp; PNG</div>
+      <div class="about-feat">📄 PDF</div>
+      <div class="about-feat">🎵 Audio</div>
+      <div class="about-feat">🎬 Video</div>
+      <div class="about-feat">📊 Office</div>
+      <div class="about-feat">📁 Batch</div>
+    </div>
+    <div class="about-footer">Built with Electron &amp; Node.js</div>
+  </div>
+</div>
+
+<script src="renderer.js"></script>
+</body>
+</html>
